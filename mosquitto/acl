@@ -5,6 +5,8 @@ topic write sentinel/telemetry
 # Service FastAPI : vérifie la signature, republie les données validées, lève les alertes cyber
 user api
 topic read sentinel/telemetry
+topic read sentinel/scores
+topic read sentinel/alerts
 topic write sentinel/validated
 topic write sentinel/alerts
 

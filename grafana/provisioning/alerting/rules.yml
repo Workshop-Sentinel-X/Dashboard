@@ -1,0 +1,283 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: sentinelx-alertes
+    folder: Sentinel-X
+    interval: 10s
+    rules:
+      - uid: sx-capteur-offline
+        title: "Capteur hors ligne"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: influxdb-sentinelx
+            model:
+              refId: A
+              datasource:
+                type: influxdb
+                uid: influxdb-sentinelx
+              intervalMs: 1000
+              maxDataPoints: 43200
+              query: |
+                from(bucket: "telemetry")
+                  |> range(start: -1h)
+                  |> filter(fn: (r) => r._measurement == "telemetry" and r._field == "temp")
+                  |> group()
+                  |> last()
+                  |> map(fn: (r) => ({_time: r._time, _value: float(v: uint(v: now()) - uint(v: r._time)) / 1000000000.0}))
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+              datasource:
+                type: __expr__
+                uid: __expr__
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [30]
+              datasource:
+                type: __expr__
+                uid: __expr__
+        noDataState: Alerting
+        execErrState: Error
+        for: 0s
+        isPaused: false
+        annotations:
+          summary: "Capteur hors ligne : aucune trame validee depuis plus de 30 s"
+          note: "Verifier l ESP8266, le WiFi et le service API"
+        labels:
+          severity: critical
+      - uid: sx-presence
+        title: "Presence detectee"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: influxdb-sentinelx
+            model:
+              refId: A
+              datasource:
+                type: influxdb
+                uid: influxdb-sentinelx
+              intervalMs: 1000
+              maxDataPoints: 43200
+              query: |
+                from(bucket: "telemetry")
+                  |> range(start: -30s)
+                  |> filter(fn: (r) => r._measurement == "telemetry" and r._field == "presence")
+                  |> group()
+                  |> max()
+                  |> keep(columns: ["_time", "_value"])
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+              datasource:
+                type: __expr__
+                uid: __expr__
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.5]
+              datasource:
+                type: __expr__
+                uid: __expr__
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        isPaused: false
+        annotations:
+          summary: "Presence detectee par le capteur HC-SR501"
+          note: "Capteur de presence a 1 dans les 30 dernieres secondes"
+        labels:
+          severity: warning
+      - uid: sx-cyber
+        title: "Alerte cyber CYBER_SPOOFING"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: influxdb-sentinelx
+            model:
+              refId: A
+              datasource:
+                type: influxdb
+                uid: influxdb-sentinelx
+              intervalMs: 1000
+              maxDataPoints: 43200
+              query: |
+                from(bucket: "telemetry")
+                  |> range(start: -30s)
+                  |> filter(fn: (r) => r._measurement == "alerts" and r._field == "event" and r.code == "CYBER_SPOOFING")
+                  |> group()
+                  |> count()
+                  |> map(fn: (r) => ({_time: now(), _value: float(v: r._value)}))
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+              datasource:
+                type: __expr__
+                uid: __expr__
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0]
+              datasource:
+                type: __expr__
+                uid: __expr__
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        isPaused: false
+        annotations:
+          summary: "Trame falsifiee ou rejouee detectee par l API"
+          note: "Signature HMAC invalide ou trame rejouee"
+        labels:
+          severity: critical
+      - uid: sx-intrusion
+        title: "Intrusion detectee par la camera"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: influxdb-sentinelx
+            model:
+              refId: A
+              datasource:
+                type: influxdb
+                uid: influxdb-sentinelx
+              intervalMs: 1000
+              maxDataPoints: 43200
+              query: |
+                from(bucket: "telemetry")
+                  |> range(start: -30s)
+                  |> filter(fn: (r) => r._measurement == "alerts" and r._field == "event" and r.code == "INTRUSION")
+                  |> group()
+                  |> count()
+                  |> map(fn: (r) => ({_time: now(), _value: float(v: r._value)}))
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+              datasource:
+                type: __expr__
+                uid: __expr__
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0]
+              datasource:
+                type: __expr__
+                uid: __expr__
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        isPaused: false
+        annotations:
+          summary: "Intrus localise par l IA vision"
+          note: "Alerte INTRUSION recue sur sentinel/alerts"
+        labels:
+          severity: critical
+      - uid: sx-anomaly
+        title: "Anomalie capteurs"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: influxdb-sentinelx
+            model:
+              refId: A
+              datasource:
+                type: influxdb
+                uid: influxdb-sentinelx
+              intervalMs: 1000
+              maxDataPoints: 43200
+              query: |
+                from(bucket: "telemetry")
+                  |> range(start: -30s)
+                  |> filter(fn: (r) => r._measurement == "alerts" and r._field == "event" and r.code == "ANOMALY")
+                  |> group()
+                  |> count()
+                  |> map(fn: (r) => ({_time: now(), _value: float(v: r._value)}))
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+              datasource:
+                type: __expr__
+                uid: __expr__
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0]
+              datasource:
+                type: __expr__
+                uid: __expr__
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        isPaused: false
+        annotations:
+          summary: "Anomalie detectee par l IA capteurs"
+          note: "Alerte ANOMALY recue sur sentinel/alerts"
+        labels:
+          severity: warning

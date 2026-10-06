@@ -41,6 +41,21 @@ services:
     volumes:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
 
+  api:
+    build: ./api
+    container_name: sentinelx-api
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    ports:
+      - "8000:8000"
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_USER: api
+      MQTT_PASSWORD: ${MQTT_API_PASSWORD:-api-sx}
+      HMAC_SECRET: ${HMAC_SECRET:-change-me-hmac-secret}
+      VISION_API_KEY: ${VISION_API_KEY:-vision-key-change-me}
+
   grafana:
     image: grafana/grafana:11.2.0
     container_name: sentinelx-grafana
@@ -52,6 +67,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-https://discord.com/api/webhooks/1556945500102467634/1weW7Ub1DpkdWjTQBQfvaV_D1cxmkY2409GbGIHqm7Sc0b6fZiytAJN5uCJvPa_VItAJ}
       INFLUX_ORG: ${INFLUX_ORG:-sentinelx}
       INFLUX_BUCKET: ${INFLUX_BUCKET:-telemetry}
       INFLUX_TOKEN: ${INFLUX_TOKEN:-sentinelx-super-token-admin}
@@ -62,6 +78,17 @@ services:
 
 volumes:
   mosquitto_data:
+    external: true
+    name: sentinelx-stack_mosquitto_data
+
   mosquitto_log:
+    external: true
+    name: sentinelx-stack_mosquitto_log
+
   influxdb_data:
+    external: true
+    name: sentinelx-stack_influxdb_data
+
   grafana_data:
+    external: true
+    name: sentinelx-stack_grafana_data

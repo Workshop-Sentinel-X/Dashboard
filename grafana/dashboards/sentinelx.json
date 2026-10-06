@@ -1,0 +1,946 @@
+{
+  "uid": "sentinelx-main",
+  "title": "Sentinel-X - Supervision",
+  "tags": [
+    "sentinelx"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "version": 2,
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Statut capteur",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"temp\")\n  |> group()\n  |> last()\n  |> map(fn: (r) => ({_time: r._time, _value: float(v: uint(v: now()) - uint(v: r._time)) / 1000000000.0}))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "HORS LIGNE",
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "range",
+              "options": {
+                "from": 0,
+                "to": 10,
+                "result": {
+                  "text": "EN LIGNE",
+                  "color": "green",
+                  "index": 0
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 10,
+                "to": 100000000,
+                "result": {
+                  "text": "HORS LIGNE",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Dernière réception",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 4,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"temp\")\n  |> group()\n  |> last()\n  |> map(fn: (r) => ({_time: r._time, _value: float(v: uint(v: now()) - uint(v: r._time)) / 1000000000.0}))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "-",
+          "unit": "s",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Température",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 7,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"temp\")\n  |> group()\n  |> last()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "-",
+          "unit": "celsius",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2F5D8A",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Humidité",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 11,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"humidity\")\n  |> group()\n  |> last()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "-",
+          "unit": "humidity",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2F5D8A",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Distance",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 15,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"distance\")\n  |> group()\n  |> last()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "-",
+          "unit": "lengthcm",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2F5D8A",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Présence",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"presence\")\n  |> group()\n  |> last()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "-",
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "AUCUNE",
+                  "color": "green",
+                  "index": 0
+                },
+                "1": {
+                  "text": "DÉTECTÉE",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Température (°C)",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"temp\")\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#B5532F"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Humidité (%)",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"humidity\")\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "humidity",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#2F5D8A"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Distance (cm)",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"distance\")\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "lengthcm",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5B6770"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Score d'anomalie (Isolation Forest)",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"scores\" and r._field == \"score\")\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#8E44AD"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Intrusions",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"alerts\" and r._field == \"event\" and r.code == \"INTRUSION\")\n  |> group()\n  |> count()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Alertes cyber",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"alerts\" and r._field == \"event\" and r.code == \"CYBER_SPOOFING\")\n  |> group()\n  |> count()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "Anomalies",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 12
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"alerts\" and r._field == \"event\" and r.code == \"ANOMALY\")\n  |> group()\n  |> count()"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 14,
+      "type": "state-timeline",
+      "title": "Présence",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"telemetry\" and r._field == \"presence\")\n  |> group(columns: [\"_field\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "range",
+              "options": {
+                "from": 0,
+                "to": 0.5,
+                "result": {
+                  "text": "Aucune",
+                  "color": "green",
+                  "index": 0
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 0.5,
+                "to": 1,
+                "result": {
+                  "text": "Détectée",
+                  "color": "red",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "mergeValues": true,
+        "showValue": "auto",
+        "rowHeight": 0.8,
+        "legend": {
+          "showLegend": false
+        }
+      }
+    },
+    {
+      "id": 15,
+      "type": "table",
+      "title": "Dernières alertes",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-sentinelx"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-sentinelx"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"alerts\" and r._field == \"message\")\n  |> group()\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 15)\n  |> keep(columns: [\"_time\", \"code\", \"source\", \"severity\", \"_value\"])"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "_time": "heure",
+              "_value": "message"
+            },
+            "indexByName": {
+              "_time": 0,
+              "code": 1,
+              "severity": 2,
+              "source": 3,
+              "_value": 4
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "code"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "INTRUSION": {
+                        "color": "red",
+                        "index": 0
+                      },
+                      "CYBER_SPOOFING": {
+                        "color": "purple",
+                        "index": 1
+                      },
+                      "ANOMALY": {
+                        "color": "orange",
+                        "index": 2
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      }
+    }
+  ]
+}

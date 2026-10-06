@@ -41,21 +41,6 @@ services:
     volumes:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
 
-  api:
-    build: ./api
-    container_name: sentinelx-api
-    restart: unless-stopped
-    depends_on:
-      - mosquitto
-    ports:
-      - "8000:8000"
-    environment:
-      MQTT_HOST: mosquitto
-      MQTT_USER: api
-      MQTT_PASSWORD: ${MQTT_API_PASSWORD:-api-sx}
-      HMAC_SECRET: ${HMAC_SECRET:-change-me-hmac-secret}
-      VISION_API_KEY: ${VISION_API_KEY:-vision-key-change-me}
-
   grafana:
     image: grafana/grafana:11.2.0
     container_name: sentinelx-grafana

@@ -1,20 +1,51 @@
-# Sentinel-X : stack serveur (Mosquitto + InfluxDB + Grafana)
+# Sentinel-X : stack serveur (Mosquitto + API FastAPI + Telegraf + InfluxDB + Grafana)
 
-    docker compose up -d
+## Démarrage
 
-- Grafana  : http://localhost:3000  (identifiants dans .env)
-- InfluxDB : http://localhost:8086
-- MQTT     : <IP du serveur>:8883
-- API      : http://localhost:8000 (documentation : http://localhost:8000/docs)
+Prérequis : Docker Desktop lancé ("Engine running").
 
-L'API FastAPI est démarrée avec Docker Compose. Elle écoute les trames MQTT
-sur `sentinel/telemetry`, vérifie leur signature HMAC, puis publie les mesures
-validées et les alertes. Configurez `MQTT_API_PASSWORD` et `HMAC_SECRET` dans
-`.env` avec les mêmes valeurs que les composants qui se connectent à l'API.
+1. Cloner le repo (branche `dev`)
+2. Double-cliquer sur **`start.bat`** (Mac/Linux : `./start.sh`)
+3. Grafana s'ouvre sur http://localhost:3000 (admin / admin)
 
-Test sans ESP :
+Données de test sans l'ESP : double-cliquer sur **`simulate.bat`**
+(`simulate.bat fake` envoie des trames falsifiées -> alerte `CYBER_SPOOFING`).
+Arrêter : **`stop.bat`**.
 
-    docker exec sentinelx-mosquitto mosquitto_pub -t sentinelx/esp01/telemetry -m '{"device_id":"esp01","temp":24.5,"gas":312,"presence":0}'
+| Service  | Adresse |
+|---|---|
+| Grafana  | http://localhost:3000 |
+| API      | http://localhost:8000/docs |
+| InfluxDB | http://localhost:8086 |
+| MQTT     | `<IP du serveur>:8883` |
+
+## Comptes MQTT
+
+Définis dans `mosquitto/passwd` (droits dans `mosquitto/acl`). Mot de passe = `<compte>-sx`,
+à changer avant la démo.
+
+| Compte | Usage |
+|---|---|
+| esp01 | ESP8266 (publie `sentinel/telemetry`) |
+| api | API FastAPI |
+| ia | IA capteurs |
+| vision | IA vision |
+| telegraf | Dashboard |
+
+Ajouter ou changer un compte :
+
+    docker compose exec mosquitto mosquitto_passwd -b /mosquitto/config/passwd <compte> <mot de passe>
+    docker compose restart mosquitto
+
+## API
+
+L'API (dossier `FastAPI/`) écoute `sentinel/telemetry`, vérifie la signature HMAC, puis publie les mesures
+validées sur `sentinel/validated` et les alertes sur `sentinel/alerts`. La clé HMAC (`HMAC_SECRET`) et le mot
+de passe MQTT de l'API (`MQTT_API_PASSWORD`) peuvent être surchargés dans un fichier `.env`.
+
+Logs : `docker compose logs -f api`
+
+## Grafana
 
 Requête Flux pour un panneau (champ temp, mesure "telemetry") :
 

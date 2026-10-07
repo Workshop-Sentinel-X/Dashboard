@@ -1,2 +1,2 @@
 .env
-mosquitto/passwd
+FastAPI/sentinel.db

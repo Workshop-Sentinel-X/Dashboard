@@ -4,7 +4,7 @@
 
 - Grafana  : http://localhost:3000  (identifiants dans .env)
 - InfluxDB : http://localhost:8086
-- MQTT     : <IP du serveur>:1883
+- MQTT     : <IP du serveur>:8883
 - API      : http://localhost:8000 (documentation : http://localhost:8000/docs)
 
 L'API FastAPI est démarrée avec Docker Compose. Elle écoute les trames MQTT

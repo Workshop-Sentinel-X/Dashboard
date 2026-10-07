@@ -34,7 +34,7 @@ def main():
     n = int(sys.argv[2]) if len(sys.argv) > 2 else 10
     c = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     c.username_pw_set("esp01", "esp01-sx")
-    c.connect(HOST, 1883)
+    c.connect(HOST, 8883)
     c.loop_start()
 
     def send(msg):

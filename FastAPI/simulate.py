@@ -16,7 +16,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "fake":
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 # Logs in as the ESP's account, since it plays the ESP
 client.username_pw_set(os.getenv("SIM_USER", "esp01"), os.getenv("SIM_PASSWORD", "esp01-sx"))
-client.connect(os.getenv("MQTT_HOST", "localhost"), 1883)
+client.connect(os.getenv("MQTT_HOST", "localhost"), 8883)
 client.loop_start()  # background thread: keeps the connection alive
 
 while True:

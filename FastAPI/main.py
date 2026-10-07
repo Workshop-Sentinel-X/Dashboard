@@ -11,7 +11,7 @@ import db
 
 SECRET = os.getenv("HMAC_SECRET", "dev-secret-change-me").encode()
 BROKER = os.getenv("MQTT_HOST", "mosquitto")
-PORT = int(os.getenv("MQTT_PORT", "1883"))
+PORT = int(os.getenv("MQTT_PORT", "8883"))
 # Broker requires a login (dossier technique §4.1); account "api" from the team's mosquitto/acl
 MQTT_USER = os.getenv("MQTT_USER", "api")
 MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "api-sx")

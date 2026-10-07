@@ -9,7 +9,8 @@ Prérequis : Docker Desktop lancé ("Engine running").
 3. Grafana s'ouvre sur http://localhost:3000 (admin / admin)
 
 Données de test sans l'ESP : double-cliquer sur **`simulate.bat`**
-(`simulate.bat fake` envoie des trames falsifiées -> alerte `CYBER_SPOOFING`).
+(`simulate.bat fake` envoie des trames falsifiées -> alerte `CYBER_SPOOFING`,
+`simulate.bat anomaly` fait monter la température -> alerte `ANOMALY` de l'IA 2).
 Arrêter : **`stop.bat`**.
 
 | Service  | Adresse |

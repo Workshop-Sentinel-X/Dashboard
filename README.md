@@ -5,6 +5,12 @@
 - Grafana  : http://localhost:3000  (identifiants dans .env)
 - InfluxDB : http://localhost:8086
 - MQTT     : <IP du serveur>:1883
+- API      : http://localhost:8000 (documentation : http://localhost:8000/docs)
+
+L'API FastAPI est démarrée avec Docker Compose. Elle écoute les trames MQTT
+sur `sentinel/telemetry`, vérifie leur signature HMAC, puis publie les mesures
+validées et les alertes. Configurez `MQTT_API_PASSWORD` et `HMAC_SECRET` dans
+`.env` avec les mêmes valeurs que les composants qui se connectent à l'API.
 
 Test sans ESP :
 

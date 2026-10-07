@@ -41,6 +41,25 @@ services:
     volumes:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
 
+  api:
+    build:
+      context: ./FastAPI
+    container_name: sentinelx-api
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    ports:
+      - "8000:8000"
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+      MQTT_USER: api
+      MQTT_PASSWORD: ${MQTT_API_PASSWORD:-api-sx}
+      HMAC_SECRET: ${HMAC_SECRET:-dev-secret-change-me}
+      DB_PATH: /data/sentinel.db
+    volumes:
+      - api_data:/data
+
   grafana:
     image: grafana/grafana:11.2.0
     container_name: sentinelx-grafana
@@ -77,3 +96,5 @@ volumes:
   grafana_data:
     external: true
     name: sentinelx-stack_grafana_data
+
+  api_data:

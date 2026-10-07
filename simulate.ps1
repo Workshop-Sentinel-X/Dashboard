@@ -1,7 +1,7 @@
 # Simule tout le pipeline (FastAPI + IA capteurs + IA vision) pour développer le dashboard sans les autres briques.
 # Usage : .\simulate.ps1   (Ctrl+C pour arrêter)
 function Pub($u, $p, $t, $j) {
-  $j | docker exec -i sentinelx-mosquitto mosquitto_pub -u $u -P $p -t $t -s
+  $j | docker exec -i sentinelx-mosquitto mosquitto_pub -p 8883 -u $u -P $p -t $t -s
 }
 $inv = [Globalization.CultureInfo]::InvariantCulture
 $i = 0

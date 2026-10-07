@@ -1,0 +1,9 @@
+# Files read inside Linux containers must keep LF line endings,
+# otherwise Mosquitto reads "password\r" and every login fails.
+mosquitto/** text eol=lf
+telegraf/** text eol=lf
+grafana/** text eol=lf
+FastAPI/** text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.bat text eol=crlf

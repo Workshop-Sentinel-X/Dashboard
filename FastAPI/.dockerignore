@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+.env
+sentinel.db
+passwords.txt
+mosquitto.conf
+.git/

@@ -82,19 +82,15 @@ services:
 
 volumes:
   mosquitto_data:
-    external: true
     name: sentinelx-stack_mosquitto_data
 
   mosquitto_log:
-    external: true
     name: sentinelx-stack_mosquitto_log
 
   influxdb_data:
-    external: true
     name: sentinelx-stack_influxdb_data
 
   grafana_data:
-    external: true
     name: sentinelx-stack_grafana_data
 
   api_data:

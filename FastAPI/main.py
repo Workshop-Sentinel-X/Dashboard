@@ -16,9 +16,22 @@ PORT = int(os.getenv("MQTT_PORT", "8883"))
 # Broker requires a login (dossier technique §4.1); account "api" from the team's mosquitto/acl
 MQTT_USER = os.getenv("MQTT_USER", "api")
 MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "api-sx")
+# TLS (Cyber config): set MQTT_CA_CERT to the CA certificate path to connect over TLS
+CA_CERT = os.getenv("MQTT_CA_CERT")
+# "true" = skip the hostname check only (traffic stays encrypted and the CA is still verified)
+TLS_INSECURE = os.getenv("MQTT_TLS_INSECURE", "false").lower() == "true"
+
+
+def configure(c):
+    """Login + TLS, shared by the API and the simulator."""
+    c.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    if CA_CERT:
+        c.tls_set(ca_certs=CA_CERT)
+        c.tls_insecure_set(TLS_INSECURE)
+
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+configure(client)
 
 # IA 2: anomaly detector, fed only with frames whose HMAC is valid
 detector = SentinelAnomalyDetector()
@@ -100,7 +113,7 @@ def on_connect(c, userdata, flags, reason_code, properties):
     if reason_code.is_failure:
         print("Broker refused the connection:", reason_code)  # "Not authorized" = wrong login
         return
-    print("Connected to broker as", MQTT_USER)
+    print("Connected to broker as", MQTT_USER, "(TLS)" if CA_CERT else "(no TLS)")
     c.subscribe("sentinel/telemetry")  # here so it re-subscribes after a broker restart
 
 

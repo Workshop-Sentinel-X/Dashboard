@@ -31,6 +31,16 @@ from sklearn.preprocessing import StandardScaler
 FEATURES = ["temperature", "humidity", "motion_detected", "distance_cm"]
 MODEL_PATH = "anomaly_model.joblib"
 
+# Plage qu'un capteur peut PHYSIQUEMENT mesurer (fiches techniques, §3.2).
+# Ce n'est pas un seuil de détection : une valeur hors plage n'est pas une menace,
+# c'est une lecture ratée (DHT22 qui renvoie NaN, ultrason sans écho...).
+SENSOR_LIMITS = {
+    "temperature": (-40, 80),     # DHT22
+    "humidity": (0, 100),         # DHT22
+    "motion_detected": (0, 1),    # capteur d'obstacle IR : 0 ou 1
+    "distance_cm": (2, 400),      # HC-SR04
+}
+
 # Capteurs à valeur continue : on suit leur niveau ET leur tendance
 CONTINUOUS = ["temperature", "humidity", "distance_cm"]
 
@@ -53,6 +63,27 @@ CONFIRMATION = 3
 INCIDENT_GAP = TREND_WINDOW
 
 
+def valid_rows(df: pd.DataFrame) -> pd.Series:
+    """True pour chaque ligne dont les 4 mesures sont physiquement possibles.
+    Une valeur vide (NaN) compte comme invalide : between() renvoie False."""
+    valid = pd.Series(True, index=df.index)
+    for column, (low, high) in SENSOR_LIMITS.items():
+        valid &= pd.to_numeric(df[column], errors="coerce").between(low, high)
+    return valid
+
+
+def clean(df: pd.DataFrame) -> pd.DataFrame:
+    """Retire les lectures ratées et les doublons avant d'entraîner ou d'analyser."""
+    valid = valid_rows(df)
+    duplicated = df.duplicated(subset="timestamp") if "timestamp" in df.columns else False
+    kept = df[valid & ~duplicated].reset_index(drop=True)
+    removed = len(df) - len(kept)
+    if removed:
+        print(f"Nettoyage : {removed} ligne(s) retirée(s) sur {len(df)} "
+              f"({(~valid).sum()} lecture(s) impossible(s), {int(pd.Series(duplicated).sum())} doublon(s))")
+    return kept
+
+
 def add_features(df: pd.DataFrame) -> pd.DataFrame:
     """Ajoute ce que l'IA doit voir en plus des valeurs brutes :
     - la tendance sur 10 s : un incendie monte de +3 °C en 10 s, alors que le
@@ -73,6 +104,7 @@ def feature_columns() -> list[str]:
 
 def train(df: pd.DataFrame) -> dict:
     """L'entraînement mémorise les mesures normales (après mise à l'échelle)."""
+    df = clean(df)
     data = add_features(df)
     detector = Pipeline([
         ("scaler", StandardScaler()),
@@ -218,7 +250,7 @@ def main() -> None:
         if not Path(MODEL_PATH).exists():
             print(f"Modèle introuvable : lance d'abord la commande train.")
             return
-        result = detect(df)
+        result = detect(clean(df))
         result.to_csv("resultats_anomalies.csv", index=False)
         print(f"{len(incidents(result))} incident(s) -> resultats_anomalies.csv")
 

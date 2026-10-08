@@ -1,0 +1,13 @@
+services:
+  mosquitto:
+    volumes:
+      - /etc/sentinel-x/mqtt-certs:/mosquitto/certs:ro
+      - /etc/sentinel-x/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+  telegraf:
+    volumes:
+      - /etc/sentinel-x/mqtt-certs/sentinel-ca.crt:/etc/telegraf/certs/sentinel-ca.crt:ro
+      - /etc/sentinel-x/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+  api:
+    volumes:
+      - /etc/sentinel-x/FastAPI/main.py:/app/main.py:ro
+      - /etc/sentinel-x/mqtt-certs/sentinel-ca.crt:/etc/sentinel-x/certs/sentinel-ca.crt:ro      

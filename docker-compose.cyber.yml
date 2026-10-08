@@ -1,3 +1,6 @@
+# Cyber override (TLS) for the VM:
+#   docker compose -f docker-compose.yml -f docker-compose.cyber.yml up -d --build
+# Certificates and TLS configs stay on the VM under /etc/sentinel-x/ (the server key must not go in git).
 services:
   mosquitto:
     volumes:
@@ -8,6 +11,10 @@ services:
       - /etc/sentinel-x/mqtt-certs/sentinel-ca.crt:/etc/telegraf/certs/sentinel-ca.crt:ro
       - /etc/sentinel-x/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
   api:
+    # main.py is no longer overridden: the API from the repo connects over TLS when MQTT_CA_CERT is set
+    environment:
+      MQTT_CA_CERT: /etc/sentinel-x/certs/sentinel-ca.crt
+      # If the server certificate doesn't list "mosquitto" as a name, uncomment (still encrypted + CA-verified):
+      # MQTT_TLS_INSECURE: "true"
     volumes:
-      - /etc/sentinel-x/FastAPI/main.py:/app/main.py:ro
-      - /etc/sentinel-x/mqtt-certs/sentinel-ca.crt:/etc/sentinel-x/certs/sentinel-ca.crt:ro      
+      - /etc/sentinel-x/mqtt-certs/sentinel-ca.crt:/etc/sentinel-x/certs/sentinel-ca.crt:ro

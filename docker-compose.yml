@@ -71,7 +71,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
-      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-https://discord.com/api/webhooks/1556945500102467634/1weW7Ub1DpkdWjTQBQfvaV_D1cxmkY2409GbGIHqm7Sc0b6fZiytAJN5uCJvPa_VItAJ}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
       INFLUX_ORG: ${INFLUX_ORG:-sentinelx}
       INFLUX_BUCKET: ${INFLUX_BUCKET:-telemetry}
       INFLUX_TOKEN: ${INFLUX_TOKEN:-sentinelx-super-token-admin}

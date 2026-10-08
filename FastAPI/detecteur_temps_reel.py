@@ -14,6 +14,7 @@ une trame pirate ne doit jamais atteindre l'IA.
         mqtt_client.publish("sentinel/alerts", json.dumps(alert))
 """
 
+import math
 from collections import deque
 from pathlib import Path
 
@@ -25,6 +26,7 @@ from anomaly_detector import (
     FEATURES,
     INCIDENT_GAP,
     MODEL_PATH,
+    SENSOR_LIMITS,
     SMOOTH_WINDOW,
     TREND_WINDOW,
     detect,
@@ -40,6 +42,23 @@ RECOMMENDED_ACTIONS = {
     "temperature": "Dérive thermique : inspecter le local (risque d'incendie)",
     "humidity": "Mesure d'humidité incohérente : vérifier le capteur DHT22",
 }
+
+
+def check_metrics(metrics: dict) -> dict[str, float]:
+    """Renvoie les 4 mesures en nombres, ou lève ValueError si l'une est absente,
+    vide (NaN) ou physiquement impossible. Une mesure refusée n'entre jamais
+    dans l'historique : elle ne peut donc pas fausser les mesures suivantes."""
+    checked = {}
+    for feature, (low, high) in SENSOR_LIMITS.items():
+        if feature not in metrics:
+            raise ValueError(f"{feature} absente")
+        value = float(metrics[feature])
+        if not math.isfinite(value):
+            raise ValueError(f"{feature} vide (lecture ratée du capteur)")
+        if not low <= value <= high:
+            raise ValueError(f"{feature} = {value} impossible (plage du capteur : {low} à {high})")
+        checked[feature] = value
+    return checked
 
 
 class SentinelAnomalyDetector:
@@ -63,8 +82,9 @@ class SentinelAnomalyDetector:
 
     def process(self, telemetry: dict) -> dict | None:
         """telemetry : la trame JSON de sentinel/telemetry, déjà décodée en dict."""
-        metrics = telemetry["metrics"]
-        self.history.append({feature: float(metrics[feature]) for feature in FEATURES})
+        # Valider AVANT d'ajouter à l'historique : une mesure impossible (ValueError)
+        # ne doit pas fausser les analyses des secondes suivantes
+        self.history.append(check_metrics(telemetry["metrics"]))
 
         last = detect(pd.DataFrame(self.history), self.model).iloc[-1]
         self.last_score = round(float(last["score"]), 3)  # exposed for sentinel/scores

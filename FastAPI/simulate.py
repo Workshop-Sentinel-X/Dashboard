@@ -16,9 +16,10 @@ if mode == "fake":
     main.SECRET = b"wrong-key"
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-# Logs in as the ESP's account, since it plays the ESP
+main.configure(client)  # same TLS settings as the API (MQTT_CA_CERT)
+# ...but logs in as the ESP's account, since it plays the ESP
 client.username_pw_set(os.getenv("SIM_USER", "esp01"), os.getenv("SIM_PASSWORD", "esp01-sx"))
-client.connect(os.getenv("MQTT_HOST", "localhost"), 8883)
+client.connect(os.getenv("MQTT_HOST", "localhost"), main.PORT)
 client.loop_start()  # background thread: keeps the connection alive
 
 i = 0

@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
 import db
+from detecteur_temps_reel import SentinelAnomalyDetector
 
 SECRET = os.getenv("HMAC_SECRET", "dev-secret-change-me").encode()
 BROKER = os.getenv("MQTT_HOST", "mosquitto")
@@ -18,6 +19,9 @@ MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "api-sx")
 
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+
+# IA 2: anomaly detector, fed only with frames whose HMAC is valid
+detector = SentinelAnomalyDetector()
 
 
 @asynccontextmanager
@@ -42,8 +46,22 @@ def sign(device_id, timestamp, m):
     return hmac.new(SECRET, text.encode(), hashlib.sha256).hexdigest()
 
 
-def send_to_anomaly_model(frame):
-    print("VALID ->", frame["metrics"])  # TODO: plug IA 2's model here
+def send_to_anomaly_model(c, frame):
+    print("VALID ->", frame["metrics"])
+    try:
+        alert = detector.process(frame)
+    except Exception as e:
+        print("Anomaly model error:", e)  # a model problem must not stop frame processing
+        return
+
+    # Score for Grafana's "Score d'anomalie" panel (LOF: below 0 = abnormal)
+    c.publish("sentinel/scores", json.dumps({"device_id": frame["device_id"], "score": detector.last_score}))
+
+    if alert is not None:
+        # IA 2's alert (dossier §7.2) + the fields Grafana filters on (code/severity/message)
+        alert.update(code="ANOMALY", severity="high", message=alert["recommended_action"])
+        print("ANOMALY ->", alert["details"]["capteur_en_cause"])
+        c.publish("sentinel/alerts", json.dumps(alert))
 
 
 def on_message(c, userdata, msg):
@@ -75,7 +93,7 @@ def on_message(c, userdata, msg):
         "distance": m["distance_cm"],
         "presence": m["motion_detected"],
     }))
-    send_to_anomaly_model(frame)
+    send_to_anomaly_model(c, frame)
 
 
 def on_connect(c, userdata, flags, reason_code, properties):

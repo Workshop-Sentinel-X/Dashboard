@@ -9,6 +9,8 @@ topic read sentinel/scores
 topic read sentinel/alerts
 topic write sentinel/validated
 topic write sentinel/alerts
+# IA 2 tourne dans l'API : l'API publie son score
+topic write sentinel/scores
 
 # Moteur IA capteurs (Isolation Forest)
 user ia

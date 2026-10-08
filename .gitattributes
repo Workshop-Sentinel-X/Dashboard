@@ -7,3 +7,9 @@ FastAPI/** text eol=lf
 *.sh text eol=lf
 *.yml text eol=lf
 *.bat text eol=crlf
+
+# Binary files: never touch their bytes
+*.joblib binary
+*.pt binary
+*.png binary
+*.jpg binary

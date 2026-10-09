@@ -71,7 +71,8 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
-      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+      # Valeur bidon par défaut : sans URL, Grafana refuse de démarrer (contact point Discord vide)
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-https://discord.com/api/webhooks/0/demo-locale}
       INFLUX_ORG: ${INFLUX_ORG:-sentinelx}
       INFLUX_BUCKET: ${INFLUX_BUCKET:-telemetry}
       INFLUX_TOKEN: ${INFLUX_TOKEN:-sentinelx-super-token-admin}

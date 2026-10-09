@@ -20,6 +20,15 @@ Arrêter : **`stop.bat`**.
 | InfluxDB | http://localhost:8086 |
 | MQTT     | `<IP du serveur>:8883` |
 
+## Démo locale avec le vrai NodeMCU (branche `demo-locale`)
+
+1. `start.bat` (ou `docker compose up -d --build`)
+2. PowerShell **en administrateur** : `powershell -ExecutionPolicy Bypass -File .\demo-reseau.ps1`
+   (ouvre le port 8883 et affiche l'IP Wi-Fi du PC)
+3. Dashboard du NodeMCU > « Envoi vers l'API » : IP du PC, port 8883, TLS **Non**, `esp01` / `esp01-sx`
+4. Vérifier : `docker compose logs -f api` doit afficher `VALID -> {...}` chaque seconde,
+   puis Grafana (http://localhost:3000) se remplit avec les vraies mesures.
+
 ## Comptes MQTT
 
 Définis dans `mosquitto/passwd` (droits dans `mosquitto/acl`). Mot de passe = `<compte>-sx`,
